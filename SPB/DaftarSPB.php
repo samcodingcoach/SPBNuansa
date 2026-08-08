@@ -133,8 +133,11 @@ include('../Connection/validateSession.php');
 		
 		function clickReportSelected()
 		{
-			// Placeholder for viewing report
-			alert("View Report for selected items");
+			var frm = document.forms[0];
+			frm.action = "printBulkSPB.php";
+			frm.method = "POST";
+			frm.target = "_blank";
+			frm.submit();
 		}
 		
 		$(document).ready(function () {
