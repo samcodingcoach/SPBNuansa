@@ -136,7 +136,7 @@ include('../Connection/validateSession.php');
 			var frm = document.forms[0];
 			frm.action = "printBulkSPB.php";
 			frm.method = "POST";
-			frm.target = "_blank";
+			frm.target = "_self";
 			frm.submit();
 		}
 		
