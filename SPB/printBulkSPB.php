@@ -98,8 +98,41 @@ $spb_list = $_POST['chkRow'];
         .spb-header { display: none; } /* Hide the headers when printing */
         .spb-body { padding: 0; padding-top:20px; display: block !important; } /* Force display on print */
     }
+    
+    #page-loader {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        font-weight: bold;
+        color: #1a252f;
+    }
+    .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #1a252f;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 
+<div id="page-loader">
+    <div class="spinner"></div>
+    <div>Memuat Data SPB... Harap Tunggu</div>
+</div>
+
+<div id="main-content" style="display:none;">
 <div class="box round first fullpage" style="padding:20px;">
     <h2 class="title-page">Preview Bulk Print SPB</h2>
     <div class="block">
@@ -108,7 +141,7 @@ $spb_list = $_POST['chkRow'];
             <a href="javascript:history.back()" style="color:#333; text-decoration:none; font-weight:bold; font-size:16px;">
                 <img src="icon/back.png" alt="Back" style="vertical-align:middle; width:24px; height:24px; margin-right:8px;" onerror="this.src='../lib-img/back.png'"> Kembali
             </a>
-            <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> PRINT ALL</button>
+            <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> PRINT ALL (<?php echo count($spb_list); ?>)</button>
         </div>
 
         <?php
@@ -331,4 +364,11 @@ function removeSpb(event, id) {
         el.parentNode.removeChild(el);
     }
 }
+
+window.onload = function() {
+    $('#page-loader').fadeOut('fast', function() {
+        $('#main-content').fadeIn('fast');
+    });
+};
 </script>
+</div>
