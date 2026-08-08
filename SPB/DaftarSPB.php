@@ -319,7 +319,7 @@ include('../Connection/validateSession.php');
 					{
 						$no+=1;
 					?>
-                        <tr>
+                        <tr style="text-align:center;">
                         	<td>
                             	<input type="checkbox" name="chkRow[]" value="<? echo $row_getDetail['POPRCTNM'];?>" />
                             </td>
@@ -335,16 +335,16 @@ include('../Connection/validateSession.php');
                         	<td>
                             	<? echo $row_getDetail['LOCNCODE'];?>
                             </td>
-                        	<td style="text-align:left;">
+                        	<td>
                             	<? echo $row_getDetail['VENDNAME'];?>
                             </td>
-                        	<td style="text-align:left;">
+                        	<td>
                             	<? echo $row_getDetail['VNDDOCNM'];?>
                             </td>
-                        	<td style="text-align:left;">
+                        	<td>
                             	<? echo date('d-M-Y', strtotime($row_getDetail['Vendor_Document_Date']));?>
                             </td>
-                        	<td style="text-align:center;">
+                        	<td>
                             	<a style="cursor:pointer;" onclick="clickDetail('<? echo trim($row_getDetail['POPRCTNM']);?>');">Detail</a>
                                 ||
                                 <a style="cursor:pointer;" onclick="clickPrint('<? echo trim($row_getDetail['POPRCTNM']);?>');">Print</a>
