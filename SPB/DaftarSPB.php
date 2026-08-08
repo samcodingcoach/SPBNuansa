@@ -131,9 +131,30 @@ include('../Connection/validateSession.php');
 			var popy= window.open('formCancelledPO.php','popup_form','menubar=no,status=no,top=100%,left=100');
 		}
 		
+		function clickReportSelected()
+		{
+			// Placeholder for viewing report
+			alert("View Report for selected items");
+		}
+		
 		$(document).ready(function () {
+			function updateReportButton() {
+				var checkedCount = $("input[name='chkRow[]']:checked").length;
+				if (checkedCount > 1) {
+					$("#btnViewReport").val("View Report Selected (" + checkedCount + ")");
+					$("#btnViewReport").show();
+				} else {
+					$("#btnViewReport").hide();
+				}
+			}
+
 			$("#chkAll").click(function () {
 				$("input[name='chkRow[]']").prop('checked', this.checked);
+				updateReportButton();
+			});
+			
+			$("input[name='chkRow[]']").change(function () {
+				updateReportButton();
 			});
 			
 			//document.getElementById("txtKodeBarang").focus();
@@ -233,7 +254,8 @@ include('../Connection/validateSession.php');
                     </tr>
                     <tr>
                         <td colspan="2">
-                            <input type="button" value="View" name="btnView" id="btnView" onclick="clickView();">
+                            <input type="button" value="Search" name="btnView" id="btnView" onclick="clickView();">
+                            <input type="button" value="View Report Selected (0)" name="btnViewReport" id="btnViewReport" style="display:none;" onclick="clickReportSelected();">
                         </td>
                     </tr>
                 </table>
