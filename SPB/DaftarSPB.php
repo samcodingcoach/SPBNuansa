@@ -68,6 +68,17 @@ include('../Connection/validateSession.php');
 		$tanggal_1=explode("-",$_REQUEST['tanggal2']);
 		$tanggal2=$tanggal_1[2]."-".$tanggal_1[1]."-".$tanggal_1[0];
 	}
+	
+	if(!isset($_REQUEST['page']))
+	{
+		$page=1;
+	}
+	else
+	{
+		$page=$_REQUEST['page'];
+	}
+	$limit = 50;
+	$offset = ($page - 1) * $limit;
 ?>
 
 	<script language="javascript" src="../lib Calendar/calendar.js"></script>
@@ -121,7 +132,9 @@ include('../Connection/validateSession.php');
 		}
 		
 		$(document).ready(function () {
-			
+			$("#chkAll").click(function () {
+				$("input[name='chkRow[]']").prop('checked', this.checked);
+			});
 			
 			//document.getElementById("txtKodeBarang").focus();
             /*setupTinyMCE();
@@ -229,6 +242,9 @@ include('../Connection/validateSession.php');
                     <thead height="23" style="background-color:#2E5E79; color:#FFF;">
                         <tr>
                             <th style="width:3%;">
+                                <input type="checkbox" id="chkAll" />
+                            </th>
+                            <th style="width:3%;">
                                 No.
                             </th>
                             <th style="width:7%;">
@@ -256,12 +272,24 @@ include('../Connection/validateSession.php');
                     </thead>
                     <tbody id="DetailBarang">
                     <?
-					$no=0;
+					$query_count="select count(*) as total from POSPO007 a
+									where	a.LOCNCODE like '".$site."'
+									AND		a.VENDORID like '".$supplier."'
+									AND		(a.DocDate between '".$tanggal."' and '".$tanggal2."')
+					";
+					$res_count = mysql_query($query_count);
+					$row_count = mysql_fetch_array($res_count);
+					$total_records = $row_count['total'];
+					$total_pages = ceil($total_records / $limit);
+					if ($total_pages == 0) $total_pages = 1;
+
+					$no=$offset;
                     $query_getDetail="select * from POSPO007 a
 									where	a.LOCNCODE like '".$site."'
 									AND		a.VENDORID like '".$supplier."'
 									AND		(a.DocDate between '".$tanggal."' and '".$tanggal2."')
 									Order By DOCDATE desc
+									LIMIT $offset, $limit
 					";
 					$res_getDetail = mysql_query($query_getDetail);
 					//echo $query_getDetail;
@@ -270,6 +298,9 @@ include('../Connection/validateSession.php');
 						$no+=1;
 					?>
                         <tr>
+                        	<td>
+                            	<input type="checkbox" name="chkRow[]" value="<? echo $row_getDetail['POPRCTNM'];?>" />
+                            </td>
                         	<td>
                             	<? echo $no;?>
                             </td>
@@ -302,6 +333,20 @@ include('../Connection/validateSession.php');
 					?>
                     </tbody>
                 </table>
+                </div>
+                <div style="margin-top: 10px; text-align: right; padding-right: 20px;">
+                    <?php
+                    $queryString = "&supplier=".urlencode($supplier)."&tanggal=$date&tanggal2=$date2&site=".urlencode($site);
+                    echo "Total Data: $total_records | Page $page of $total_pages &nbsp;&nbsp;&nbsp;";
+                    if($page > 1) {
+                        echo "<a href='DaftarSPB.php?page=1".$queryString."' style='text-decoration:none;'>&laquo; First</a> | ";
+                        echo "<a href='DaftarSPB.php?page=".($page-1).$queryString."' style='text-decoration:none;'>&lsaquo; Prev</a> | ";
+                    }
+                    if($page < $total_pages) {
+                        echo "<a href='DaftarSPB.php?page=".($page+1).$queryString."' style='text-decoration:none;'>Next &rsaquo;</a> | ";
+                        echo "<a href='DaftarSPB.php?page=".$total_pages.$queryString."' style='text-decoration:none;'>Last &raquo;</a>";
+                    }
+                    ?>
                 </div>
             </form>
         </div>
