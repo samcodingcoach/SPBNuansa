@@ -91,7 +91,7 @@ $spb_list = $_POST['chkRow'];
     .spb-body tr { display: table-row !important; }
     .spb-body td { display: table-cell !important; vertical-align: top; padding: 4px; font-family: sans-serif; font-size: 13px; line-height: 1.3; border: none; }
 
-    @page { size: A4 portrait; margin: 5mm; }
+    @page { size: A4 portrait; margin: 0; }
     @media print {
         body { background: #fff; padding: 0; }
         .box { border: none !important; box-shadow: none !important; }
@@ -100,7 +100,7 @@ $spb_list = $_POST['chkRow'];
         .spb-header { display: none; } /* Hide the headers when printing */
         .spb-body { padding: 0; padding-top: 5px !important; display: block !important; } /* Force display on print */
         .spb-body td { font-size: 11px !important; padding: 1px 2px !important; line-height: 1.1 !important; }
-        .print-divider { display: block !important; border: 0; border-bottom: 1px dashed #000; margin: 10px 0 !important; }
+        .print-divider { display: block !important; border: 0; border-bottom: 1px dashed #000; margin: 3px 0 !important; }
     }
     .print-divider { display: none; }
     
