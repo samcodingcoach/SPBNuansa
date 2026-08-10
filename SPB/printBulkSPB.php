@@ -98,9 +98,9 @@ $spb_list = $_POST['chkRow'];
         h2.title-page, .print-btn-container, .box-header { display: none !important; }
         .spb-container { border: none; box-shadow: none; margin-bottom: 0; border-radius:0; page-break-after: auto; }
         .spb-header { display: none; } /* Hide the headers when printing */
-        .spb-body { padding: 0; padding-top:20px; display: block !important; } /* Force display on print */
-        .spb-body td { font-size: 11px !important; }
-        .print-divider { display: block !important; border: 0; border-bottom: 2px dashed #000; margin: 20px 0; }
+        .spb-body { padding: 0; padding-top: 5px !important; display: block !important; } /* Force display on print */
+        .spb-body td { font-size: 11px !important; padding: 1px 2px !important; line-height: 1.1 !important; }
+        .print-divider { display: block !important; border: 0; border-bottom: 1px dashed #000; margin: 10px 0 !important; }
     }
     .print-divider { display: none; }
     
@@ -296,8 +296,7 @@ $spb_list = $_POST['chkRow'];
                         </td>
                     </tr>
                 </table>
-                <br />
-                <table style="width:100%;">
+                <table style="width:100%; margin-top: 5px;">
                     <tr style="vertical-align:top;">
                         <td style="width:60%;">
                             Keterangan: -
