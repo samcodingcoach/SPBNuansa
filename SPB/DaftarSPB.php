@@ -150,6 +150,9 @@ include('../Connection/validateSession.php');
 		}
 		
 		$(document).ready(function () {
+            <?php if(!isset($_REQUEST['supplier']) && !isset($_REQUEST['page'])) { ?>
+                sessionStorage.removeItem('selectedSPB');
+            <?php } ?>
             var selectedSPB = JSON.parse(sessionStorage.getItem('selectedSPB')) || [];
 
 			function updateReportButton() {

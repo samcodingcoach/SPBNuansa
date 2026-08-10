@@ -87,17 +87,22 @@ $spb_list = $_POST['chkRow'];
     }
     .collapsed .icon-chevron { transform: rotate(-90deg); }
     .spb-body { padding: 30px; display: block; }
-    
-    
-    
+    .spb-body table { width: 100%; border-collapse: collapse; display: table !important; }
+    .spb-body tr { display: table-row !important; }
+    .spb-body td { display: table-cell !important; vertical-align: top; padding: 4px; font-family: sans-serif; font-size: 13px; line-height: 1.3; border: none; }
+
+    @page { size: A4 portrait; margin: 5mm; }
     @media print {
         body { background: #fff; padding: 0; }
         .box { border: none !important; box-shadow: none !important; }
         h2.title-page, .print-btn-container, .box-header { display: none !important; }
-        .spb-container { border: none; box-shadow: none; margin-bottom: 0; border-radius:0; page-break-after: always; }
+        .spb-container { border: none; box-shadow: none; margin-bottom: 0; border-radius:0; page-break-after: auto; }
         .spb-header { display: none; } /* Hide the headers when printing */
         .spb-body { padding: 0; padding-top:20px; display: block !important; } /* Force display on print */
+        .spb-body td { font-size: 11px !important; }
+        .print-divider { display: block !important; border: 0; border-bottom: 2px dashed #000; margin: 20px 0; }
     }
+    .print-divider { display: none; }
     
     #page-loader {
         position: fixed;
@@ -175,19 +180,19 @@ $spb_list = $_POST['chkRow'];
                 <!-- BEGIN ORIGINAL SPB DESIGN -->
                 <table style="width:100%;">
                     <tr>
-                        <td rowspan="6">
-                            <img src="../lib-img/Nuansa.jpg" width="200" height="75" />
+                        <td rowspan="4" style="vertical-align:top; padding-right:15px;">
+                            <img src="../lib-img/Nuansa.jpg" width="130" height="auto" />
                         </td>
-                        <td rowspan="2" style="font-weight:bold; font-size:16px;">
+                        <td rowspan="2" style="font-weight:bold; font-size:14px; vertical-align:top; white-space:nowrap;">
                             SURAT PENERIMAAN BARANG (WEBSITE)
                         </td>
-                        <td>
+                        <td style="white-space:nowrap;">
                             Cabang:
                         </td>
-                        <td>
-                            TANGGAL PB:
+                        <td style="white-space:nowrap;">
+                            Tanggal PB:
                         </td>
-                        <td>
+                        <td style="white-space:nowrap;">
                             Tanggal SJ Supplier:
                         </td>
                     </tr>
@@ -294,53 +299,22 @@ $spb_list = $_POST['chkRow'];
                 <br />
                 <table style="width:100%;">
                     <tr style="vertical-align:top;">
-                        <td colspan="2" style="width:60%;">
+                        <td style="width:60%;">
                             Keterangan: -
                         </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            
-                        </td>
-                        <td style="font-weight:bold;">
-                            Dokumen Wajib dibawa pada saat Tagihan
-                        </td>
-                    </tr>
-                    <tr style="text-align:left;">
-                        <td>
-                            
-                        </td>
-                        <td colspan="2">
+                        <td style="width:40%; text-align:left;">
                             User ID: <?php echo $row_getHeader['PTDUSRID'];?>
-                        </td>
-                    </tr>
-                    <tr style="text-align:left;">
-                        <td>
-                            
-                        </td>
-                        <td colspan="2">
-                            Print Date: <?php echo date("d/m/Y");?>
-                        </td>
-                    </tr>
-                    <tr style="text-align:left;">
-                        <td>
-                            Disiapkan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            Disetujui &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            Diantar &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            Diterima
-                        </td>
-                        <td>
-                            Lbr. 1 - Lampiran Tagihan
-                            <br />Lbr. 2 - Arsip Purchase
-                            <br />Lbr. 3 - Arsip Cab / Setempat
                         </td>
                     </tr>
                 </table>
                 <!-- END ORIGINAL SPB DESIGN -->
+                <hr class="print-divider" />
             </div>
         </div>
         <?php } ?>
-
+        <div style="text-align: right; padding-right: 15px; font-weight: bold; margin-top: 10px; font-size: 13px;" class="print-date-footer">
+            Print Date: <?php echo date("d/m/Y");?>
+        </div>
     </div>
 </div>
 
