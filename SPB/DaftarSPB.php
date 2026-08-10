@@ -69,6 +69,15 @@ include('../Connection/validateSession.php');
 		$tanggal2=$tanggal_1[2]."-".$tanggal_1[1]."-".$tanggal_1[0];
 	}
 	
+	if(!isset($_REQUEST['searchNo']))
+	{
+		$searchNo="";
+	}
+	else
+	{
+		$searchNo=$_REQUEST['searchNo'];
+	}
+	
 	if(!isset($_REQUEST['page']))
 	{
 		$page=1;
@@ -105,10 +114,18 @@ include('../Connection/validateSession.php');
 		}
 		
 		
-		
+		var searchTimer = null;
+		function onSearchNoKeyUp() {
+			clearTimeout(searchTimer);
+			searchTimer = setTimeout(function() {
+				clickView();
+			}, 1500);
+		}
+
 		function clickView()
 		{
-			window.location="DaftarSPB.php?supplier="+document.getElementById("lstSupplier").value+"&tanggal="+document.getElementById("txtTgl").value+"&tanggal2="+document.getElementById("txtTgl2").value+"&site="+document.getElementById("lstSite").value;
+			var searchParam = document.getElementById("txtSearchNo") ? document.getElementById("txtSearchNo").value : "";
+			window.location="DaftarSPB.php?supplier="+document.getElementById("lstSupplier").value+"&tanggal="+document.getElementById("txtTgl").value+"&tanggal2="+document.getElementById("txtTgl2").value+"&site="+document.getElementById("lstSite").value+"&searchNo="+searchParam;
 		}
 		
 		function clickPONumber(PONumber)
@@ -150,7 +167,14 @@ include('../Connection/validateSession.php');
 		}
 		
 		$(document).ready(function () {
-            <?php if(!isset($_REQUEST['supplier']) && !isset($_REQUEST['page'])) { ?>
+            var txtSearchNo = document.getElementById('txtSearchNo');
+            if(txtSearchNo && txtSearchNo.value !== '') {
+                txtSearchNo.focus();
+                var val = txtSearchNo.value;
+                txtSearchNo.value = '';
+                txtSearchNo.value = val;
+            }
+            <?php if(!isset($_REQUEST['supplier']) && !isset($_REQUEST['page']) && !isset($_REQUEST['searchNo'])) { ?>
                 sessionStorage.removeItem('selectedSPB');
             <?php } ?>
             var selectedSPB = JSON.parse(sessionStorage.getItem('selectedSPB')) || [];
@@ -317,19 +341,33 @@ include('../Connection/validateSession.php');
                         </td>
                     </tr>
                 </table>
-                <div style="overflow:auto; max-height:300px;">
                 <?php
+                $filter_search = "";
+                if($searchNo != "") {
+                    $filter_search = " AND a.POPRCTNM like '%".mysql_real_escape_string($searchNo)."' ";
+                }
                 $query_count="select count(*) as total from POSPO007 a
                                 where	a.LOCNCODE like '".$site."'
                                 AND		a.VENDORID like '".$supplier."'
                                 AND		(a.DocDate between '".$tanggal."' and '".$tanggal2."')
+                                $filter_search
                 ";
                 $res_count = mysql_query($query_count);
                 $row_count = mysql_fetch_array($res_count);
                 $total_records = $row_count['total'];
                 $total_pages = ceil($total_records / $limit);
                 if ($total_pages == 0) $total_pages = 1;
-
+                ?>
+                
+                <?php if ($total_records > 0 || $searchNo != "") { ?>
+                <div style="text-align: right; margin-bottom: 5px;">
+                    <label style="font-weight:bold;">Search No SPB : </label>
+                    <input type="text" id="txtSearchNo" name="txtSearchNo" maxlength="5" style="width: 120px; padding: 2px;" placeholder="5 Digit Akhir" value="<?php echo htmlspecialchars($searchNo); ?>" onkeyup="onSearchNoKeyUp();">
+                </div>
+                <?php } ?>
+                
+                <div style="overflow:auto; max-height:300px;">
+                <?php
                 if ($total_records == 0) {
                     $bulan_indo = array(1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember');
                     $tgl1 = date('d', strtotime($tanggal)) . ' ' . $bulan_indo[(int)date('m', strtotime($tanggal))] . ' ' . date('Y', strtotime($tanggal));
@@ -376,6 +414,7 @@ include('../Connection/validateSession.php');
 									where	a.LOCNCODE like '".$site."'
 									AND		a.VENDORID like '".$supplier."'
 									AND		(a.DocDate between '".$tanggal."' and '".$tanggal2."')
+                                    $filter_search
 									Order By DOCDATE desc
 									LIMIT $offset, $limit
 					";
