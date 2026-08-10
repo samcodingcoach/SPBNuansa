@@ -156,6 +156,21 @@ include('../Connection/validateSession.php');
                 alert("Minimal 2 data harus dipilih.");
                 return;
             }
+            
+            var btnReport = document.getElementById("btnViewReport");
+            if (btnReport) {
+                btnReport.disabled = true;
+                btnReport.style.cursor = "wait";
+                var dots = 0;
+                setInterval(function() {
+                    dots = (dots + 1) % 4;
+                    var text = "⏳ Loading";
+                    for(var j=0; j<dots; j++) text += ".";
+                    btnReport.value = text;
+                }, 400);
+            }
+            document.body.style.cursor = "wait";
+
             $("input[name='chkRow[]']").prop('disabled', true);
             $.each(selectedSPB, function(i, val) {
                 $('<input>').attr({ type: 'hidden', name: 'chkRow[]', value: val }).appendTo(frm);
@@ -367,7 +382,7 @@ include('../Connection/validateSession.php');
                 </div>
                 <?php } ?>
                 
-                <div style="overflow:auto; max-height:300px;">
+                <div style="overflow:auto;">
                 <?php
                 if ($total_records == 0) {
                     $bulan_indo = array(1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember');
@@ -376,7 +391,7 @@ include('../Connection/validateSession.php');
                     echo "<div style='text-align:center; padding:40px; font-weight:bold; font-size:16px;'>Data tidak ditemukan pada tanggal $tgl1 - $tgl2</div>";
                 } else {
                 ?>
-                <table class="myTable" style="width:100%; overflow:auto; max-height:200px;">
+                <table class="myTable" style="width:100%;">
                     <thead height="23" style="background-color:#2E5E79; color:#FFF;">
                         <tr>
                             <th style="width:3%;">
