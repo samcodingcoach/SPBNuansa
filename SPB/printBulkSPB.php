@@ -236,8 +236,7 @@ $spb_list = $_POST['chkRow'];
                         </td>
                     </tr>
                 </table>
-                <br />
-                <table style="width:100%;">
+                <table style="width:100%; margin-top: 3px;">
                     <tr style="">
                         <td style="text-align:left;">
                             No.
