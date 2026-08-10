@@ -134,6 +134,15 @@ include('../Connection/validateSession.php');
 		function clickReportSelected()
 		{
 			var frm = document.forms[0];
+            var selectedSPB = JSON.parse(sessionStorage.getItem('selectedSPB')) || [];
+            if(selectedSPB.length < 2) {
+                alert("Minimal 2 data harus dipilih.");
+                return;
+            }
+            $("input[name='chkRow[]']").prop('disabled', true);
+            $.each(selectedSPB, function(i, val) {
+                $('<input>').attr({ type: 'hidden', name: 'chkRow[]', value: val }).appendTo(frm);
+            });
 			frm.action = "printBulkSPB.php";
 			frm.method = "POST";
 			frm.target = "_self";
@@ -141,24 +150,67 @@ include('../Connection/validateSession.php');
 		}
 		
 		$(document).ready(function () {
+            var selectedSPB = JSON.parse(sessionStorage.getItem('selectedSPB')) || [];
+
 			function updateReportButton() {
-				var checkedCount = $("input[name='chkRow[]']:checked").length;
-				if (checkedCount > 1) {
+				var checkedCount = selectedSPB.length;
+				if (checkedCount >= 2 && checkedCount <= 30) {
 					$("#btnViewReport").val("View Report Selected (" + checkedCount + ")");
 					$("#btnViewReport").show();
 				} else {
 					$("#btnViewReport").hide();
 				}
 			}
+            
+            function updateCheckboxState() {
+                $("input[name='chkRow[]']").each(function() {
+                    if (selectedSPB.indexOf(this.value) !== -1) {
+                        $(this).prop('checked', true);
+                    }
+                });
+                updateReportButton();
+            }
 
 			$("#chkAll").click(function () {
-				$("input[name='chkRow[]']").prop('checked', this.checked);
+                var isChecked = this.checked;
+				$("input[name='chkRow[]']").each(function () {
+                    $(this).prop('checked', isChecked);
+                    var val = this.value;
+                    if (isChecked) {
+                        if (selectedSPB.indexOf(val) === -1) selectedSPB.push(val);
+                    } else {
+                        var index = selectedSPB.indexOf(val);
+                        if (index !== -1) selectedSPB.splice(index, 1);
+                    }
+                });
+                
+                if (selectedSPB.length > 30) {
+                    alert("Maksimal 30 data yang dapat dipilih!");
+                    // Tidak membatalkan centang all agar tidak rumit, tapi validasi saat submit akan mencegah > 30
+                }
+                sessionStorage.setItem('selectedSPB', JSON.stringify(selectedSPB));
 				updateReportButton();
 			});
 			
 			$("input[name='chkRow[]']").change(function () {
+                var val = this.value;
+                if (this.checked) {
+                    if (selectedSPB.indexOf(val) === -1) selectedSPB.push(val);
+                } else {
+                    var index = selectedSPB.indexOf(val);
+                    if (index !== -1) selectedSPB.splice(index, 1);
+                }
+                
+                if (selectedSPB.length > 30) {
+                    alert("Maksimal 30 data yang dapat dipilih!");
+                    $(this).prop('checked', false);
+                    selectedSPB.pop();
+                }
+                sessionStorage.setItem('selectedSPB', JSON.stringify(selectedSPB));
 				updateReportButton();
 			});
+			
+            updateCheckboxState();
 			
 			//document.getElementById("txtKodeBarang").focus();
             /*setupTinyMCE();
@@ -263,6 +315,25 @@ include('../Connection/validateSession.php');
                     </tr>
                 </table>
                 <div style="overflow:auto; max-height:300px;">
+                <?php
+                $query_count="select count(*) as total from POSPO007 a
+                                where	a.LOCNCODE like '".$site."'
+                                AND		a.VENDORID like '".$supplier."'
+                                AND		(a.DocDate between '".$tanggal."' and '".$tanggal2."')
+                ";
+                $res_count = mysql_query($query_count);
+                $row_count = mysql_fetch_array($res_count);
+                $total_records = $row_count['total'];
+                $total_pages = ceil($total_records / $limit);
+                if ($total_pages == 0) $total_pages = 1;
+
+                if ($total_records == 0) {
+                    $bulan_indo = array(1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember');
+                    $tgl1 = date('d', strtotime($tanggal)) . ' ' . $bulan_indo[(int)date('m', strtotime($tanggal))] . ' ' . date('Y', strtotime($tanggal));
+                    $tgl2 = date('d', strtotime($tanggal2)) . ' ' . $bulan_indo[(int)date('m', strtotime($tanggal2))] . ' ' . date('Y', strtotime($tanggal2));
+                    echo "<div style='text-align:center; padding:40px; font-weight:bold; font-size:16px;'>Data tidak ditemukan pada tanggal $tgl1 - $tgl2</div>";
+                } else {
+                ?>
                 <table class="myTable" style="width:100%; overflow:auto; max-height:200px;">
                     <thead height="23" style="background-color:#2E5E79; color:#FFF;">
                         <tr>
@@ -297,17 +368,6 @@ include('../Connection/validateSession.php');
                     </thead>
                     <tbody id="DetailBarang">
                     <?
-					$query_count="select count(*) as total from POSPO007 a
-									where	a.LOCNCODE like '".$site."'
-									AND		a.VENDORID like '".$supplier."'
-									AND		(a.DocDate between '".$tanggal."' and '".$tanggal2."')
-					";
-					$res_count = mysql_query($query_count);
-					$row_count = mysql_fetch_array($res_count);
-					$total_records = $row_count['total'];
-					$total_pages = ceil($total_records / $limit);
-					if ($total_pages == 0) $total_pages = 1;
-
 					$no=$offset;
                     $query_getDetail="select * from POSPO007 a
 									where	a.LOCNCODE like '".$site."'
@@ -358,7 +418,9 @@ include('../Connection/validateSession.php');
 					?>
                     </tbody>
                 </table>
+                <?php } ?>
                 </div>
+                <?php if ($total_records > 0) { ?>
                 <div style="margin-top: 10px; text-align: right; padding-right: 20px;">
                     <?php
                     $queryString = "&supplier=".urlencode($supplier)."&tanggal=$date&tanggal2=$date2&site=".urlencode($site);
@@ -373,6 +435,7 @@ include('../Connection/validateSession.php');
                     }
                     ?>
                 </div>
+                <?php } ?>
             </form>
         </div>
     </div>

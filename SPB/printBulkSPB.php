@@ -165,7 +165,7 @@ $spb_list = $_POST['chkRow'];
             <div class="<?php echo $header_class; ?>" onclick="toggleSpb('<?php echo $hash_id; ?>')">
                 <div class="spb-header-left">
                     <div class="spb-number"><?php echo htmlspecialchars($nomor_spb); ?></div>
-                    <button class="icon-trash" onclick="removeSpb(event, '<?php echo $hash_id; ?>')" title="Remove SPB"><i class="fas fa-trash-alt"></i></button>
+                    <button class="icon-trash" onclick="removeSpb(event, '<?php echo $hash_id; ?>', '<?php echo htmlspecialchars($nomor_spb); ?>')" title="Remove SPB"><i class="fas fa-trash-alt"></i></button>
                 </div>
                 <div class="spb-header-right">
                     <div class="icon-chevron"><i class="fas fa-chevron-down"></i></div>
@@ -357,11 +357,28 @@ function toggleSpb(id) {
     }
 }
 
-function removeSpb(event, id) {
+function removeSpb(event, id, spbNum) {
     event.stopPropagation(); // Prevent the toggle from triggering
     if(confirm('Apakah Anda yakin ingin menghapus SPB ini dari daftar cetak?')) {
         var el = document.getElementById('spb-' + id);
         el.parentNode.removeChild(el);
+        
+        var selected = JSON.parse(sessionStorage.getItem('selectedSPB')) || [];
+        var index = selected.indexOf(spbNum);
+        if (index !== -1) {
+            selected.splice(index, 1);
+            sessionStorage.setItem('selectedSPB', JSON.stringify(selected));
+        }
+        
+        var count = document.querySelectorAll('.spb-container').length;
+        var btn = document.querySelector('.print-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-print"></i> PRINT ALL (' + count + ')';
+        }
+        
+        if (count === 0) {
+            history.back();
+        }
     }
 }
 
