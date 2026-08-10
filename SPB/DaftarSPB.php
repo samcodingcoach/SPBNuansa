@@ -335,7 +335,8 @@ include('../Connection/validateSession.php');
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2">
+                        <td class="col1"></td>
+                        <td class="col2" style="padding-top: 10px;">
                             <input type="button" value="Search" name="btnView" id="btnView" onclick="clickView();">
                             <input type="button" value="View Report Selected (0)" name="btnViewReport" id="btnViewReport" style="display:none;" onclick="clickReportSelected();">
                         </td>
