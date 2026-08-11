@@ -200,12 +200,25 @@ include('../Connection/validateSession.php');
             }
             <?php if(!isset($_REQUEST['supplier']) && !isset($_REQUEST['page']) && !isset($_REQUEST['searchNo'])) { ?>
                 sessionStorage.removeItem('selectedSPB');
+                sessionStorage.removeItem('selectedSPB_Suppliers');
             <?php } ?>
             var selectedSPB = JSON.parse(sessionStorage.getItem('selectedSPB')) || [];
+            var selectedSPB_Suppliers = JSON.parse(sessionStorage.getItem('selectedSPB_Suppliers')) || {};
 
 			function updateReportButton() {
 				var checkedCount = selectedSPB.length;
-				if (checkedCount >= 2 && checkedCount <= 30) {
+                var uniqueSuppliers = {};
+                var supplierCount = 0;
+                
+                for(var i = 0; i < checkedCount; i++) {
+                    var sup = selectedSPB_Suppliers[selectedSPB[i]];
+                    if (sup && !uniqueSuppliers[sup]) {
+                        uniqueSuppliers[sup] = true;
+                        supplierCount++;
+                    }
+                }
+                
+				if (checkedCount >= 2 && checkedCount <= 30 && supplierCount === 1) {
 					$("#btnViewReport").val("View Report Selected (" + checkedCount + ")");
 					$("#btnViewReport").show();
 				} else {
@@ -227,6 +240,7 @@ include('../Connection/validateSession.php');
                 var alertShown = false;
 				$("input[name='chkRow[]']").each(function () {
                     var val = this.value;
+                    var sup = this.getAttribute('data-supplier');
                     if (isChecked) {
                         if (selectedSPB.length >= 30 && selectedSPB.indexOf(val) === -1) {
                             if (!alertShown) {
@@ -236,36 +250,50 @@ include('../Connection/validateSession.php');
                             $(this).prop('checked', false);
                         } else {
                             $(this).prop('checked', true);
-                            if (selectedSPB.indexOf(val) === -1) selectedSPB.push(val);
+                            if (selectedSPB.indexOf(val) === -1) {
+                                selectedSPB.push(val);
+                                selectedSPB_Suppliers[val] = sup;
+                            }
                         }
                     } else {
                         $(this).prop('checked', false);
                         var index = selectedSPB.indexOf(val);
-                        if (index !== -1) selectedSPB.splice(index, 1);
+                        if (index !== -1) {
+                            selectedSPB.splice(index, 1);
+                            delete selectedSPB_Suppliers[val];
+                        }
                     }
                 });
                 
-
-                
                 sessionStorage.setItem('selectedSPB', JSON.stringify(selectedSPB));
+                sessionStorage.setItem('selectedSPB_Suppliers', JSON.stringify(selectedSPB_Suppliers));
 				updateReportButton();
 			});
 			
 			$("input[name='chkRow[]']").change(function () {
                 var val = this.value;
+                var sup = this.getAttribute('data-supplier');
                 if (this.checked) {
-                    if (selectedSPB.indexOf(val) === -1) selectedSPB.push(val);
+                    if (selectedSPB.indexOf(val) === -1) {
+                        selectedSPB.push(val);
+                        selectedSPB_Suppliers[val] = sup;
+                    }
                 } else {
                     var index = selectedSPB.indexOf(val);
-                    if (index !== -1) selectedSPB.splice(index, 1);
+                    if (index !== -1) {
+                        selectedSPB.splice(index, 1);
+                        delete selectedSPB_Suppliers[val];
+                    }
                 }
                 
                 if (selectedSPB.length > 30) {
                     alert("Maksimal 30 data yang dapat dipilih!");
                     $(this).prop('checked', false);
-                    selectedSPB.pop();
+                    var popped = selectedSPB.pop();
+                    delete selectedSPB_Suppliers[popped];
                 }
                 sessionStorage.setItem('selectedSPB', JSON.stringify(selectedSPB));
+                sessionStorage.setItem('selectedSPB_Suppliers', JSON.stringify(selectedSPB_Suppliers));
 				updateReportButton();
 			});
 			
@@ -486,7 +514,7 @@ include('../Connection/validateSession.php');
 					?>
                         <tr style="text-align:center;">
                         	<td>
-                            	<input type="checkbox" name="chkRow[]" value="<? echo $row_getDetail['POPRCTNM'];?>" />
+                            	<input type="checkbox" name="chkRow[]" value="<? echo $row_getDetail['POPRCTNM'];?>" data-supplier="<? echo htmlspecialchars($row_getDetail['VENDORID']);?>" />
                             </td>
                         	<td>
                             	<? echo $no;?>
