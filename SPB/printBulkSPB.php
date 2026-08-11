@@ -91,6 +91,9 @@ $spb_list = $_POST['chkRow'];
     .spb-body tr { display: table-row !important; }
     .spb-body td { display: table-cell !important; vertical-align: top; padding: 4px; font-family: sans-serif; font-size: 13px; line-height: 1.3; border: none; }
 
+    .global-spb-header { display: none; }
+    .print-mode { display: none; }
+
     @page { size: A4 portrait; margin: 0; }
     @media print {
         body { background: #fff; padding: 0; }
@@ -98,9 +101,12 @@ $spb_list = $_POST['chkRow'];
         h2.title-page, .print-btn-container, .box-header { display: none !important; }
         .spb-container { border: none; box-shadow: none; margin-bottom: 0; border-radius:0; page-break-after: auto; }
         .spb-header { display: none; } /* Hide the headers when printing */
-        .spb-body { padding: 0; padding-top: 5px !important; display: block !important; } /* Force display on print */
-        .spb-body td { font-size: 11px !important; padding: 1px 2px !important; line-height: 1.1 !important; }
-        .print-divider { display: block !important; border: 0; border-bottom: 1px dashed #000; margin: 3px 0 !important; }
+        .spb-body { padding: 0; display: block !important; } /* Force display on print */
+        .spb-body td { font-size: 11px !important; padding: 0px 2px !important; line-height: 1.1 !important; }
+        
+        .preview-mode { display: none !important; }
+        .print-mode { display: block !important; }
+        .global-spb-header { display: block !important; }
     }
     .print-divider { display: none; }
     
@@ -150,6 +156,30 @@ $spb_list = $_POST['chkRow'];
         </div>
 
         <?php
+        // Global Header for Print (Hidden in Preview)
+        $first_spb = current($spb_list);
+        $query_first = "SELECT VENDNAME FROM POSPO007 WHERE POPRCTNM='".mysql_real_escape_string($first_spb)."'";
+        $res_first = mysql_query($query_first);
+        $row_first = mysql_fetch_array($res_first);
+        $first_vendor_name = $row_first['VENDNAME'];
+        ?>
+        <div class="global-spb-header" style="margin-bottom: 10px;">
+            <table style="width:100%;">
+                <tr>
+                    <td style="width:20%; vertical-align:middle;">
+                        <img src="../lib-img/Nuansa.jpg" width="130" height="auto" />
+                    </td>
+                    <td style="width:40%; font-weight:bold; font-size:16px; vertical-align:middle; text-align:left; padding-left:15px;">
+                        SURAT PENERIMAAN BARANG
+                    </td>
+                    <td style="width:40%; text-align:right; vertical-align:middle; font-size:14px;">
+                        Diterima dari: <?php echo $first_vendor_name; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <?php
         $index = 0;
         foreach($spb_list as $nomor_spb) {
             // Get Header
@@ -177,136 +207,178 @@ $spb_list = $_POST['chkRow'];
                 </div>
             </div>
             <div class="spb-body" id="body-<?php echo $hash_id; ?>" style="<?php echo $body_style; ?>">
-                <!-- BEGIN ORIGINAL SPB DESIGN -->
-                <table style="width:100%;">
-                    <tr>
-                        <td rowspan="4" style="vertical-align:top; padding-right:15px;">
-                            <img src="../lib-img/Nuansa.jpg" width="130" height="auto" />
-                        </td>
-                        <td rowspan="2" style="font-weight:bold; font-size:14px; vertical-align:top; white-space:nowrap;">
-                            SURAT PENERIMAAN BARANG (WEBSITE)
-                        </td>
-                        <td style="white-space:nowrap;">
-                            Cabang:
-                        </td>
-                        <td style="white-space:nowrap;">
-                            Tanggal PB:
-                        </td>
-                        <td style="white-space:nowrap;">
-                            Tanggal SJ Supplier:
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <?php echo $row_getHeader['MET_Store_ID'];?>
-                        </td>
-                        <td>
-                            <?php echo date('d-M-Y', strtotime($row_getHeader['DOCDATE']));?>
-                        </td>
-                        <td>
-                            <?php echo date('d-M-Y', strtotime($row_getHeader['Vendor_Document_Date']));?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Diterima Dari
-                        </td>
-                        <td>
-                            Gudang:
-                        </td>
-                        <td>
-                            No. PB:
-                        </td>
-                        <td>
-                            No. SJ Supplier:
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <?php echo $row_getHeader['VENDNAME'];?>
-                        </td>
-                        <td>
-                            <?php echo $row_getHeader['LOCNCODE'];?>
-                        </td>
-                        <td>
-                            <?php echo $row_getHeader['POPRCTNM'];?>
-                        </td>
-                        <td>
-                            <?php echo $row_getHeader['VNDDOCNM'];?>
-                        </td>
-                    </tr>
-                </table>
-                <table style="width:100%; margin-top: 3px;">
-                    <tr style="">
-                        <td style="text-align:left;">
-                            No.
-                        </td>
-                        <td>
-                            ITEMDESC
-                        </td>
-                        <td>
-                            QTY Rcv
-                        </td>
-                        <td style="text-align:left;">
-                            UOFM
-                        </td>
-                        <td style="text-align:left;">
-                            PO Number
-                        </td>
-                    </tr>
-                    <?php
-                    $no=0;
-                    $jum_qty=0;
-                    $query_getDetail="	SELECT * FROM POSPO008
-                                        WHERE POPRCTNM='".mysql_real_escape_string($nomor_spb)."'
-                                    ";
-                    $res_getDetail=mysql_query($query_getDetail);
-                    while($row_getDetail=mysql_fetch_array($res_getDetail))
-                    {
-                        $no+=1;
-                        $jum_qty+=$row_getDetail['QTYRCVOA'];
-                    ?>
-                    <tr>
-                        <td>
-                            <?php echo $no;?>
-                        </td>
-                        <td>
-                            <?php echo $row_getDetail['ITEMDESC'];?>
-                        </td>
-                        <td style="text-align:left;">
-                            <?php echo number_format($row_getDetail['QTYRCVOA']);?>
-                        </td>
-                        <td style="text-align:left;">
-                            <?php echo $row_getDetail['UOFM'];?>
-                        </td>
-                        <td style="text-align:left;">
-                            <?php echo $row_getDetail['PONUMBER'];?>
-                        </td>
-                    </tr>
-                    <?php
-                    }
-                    ?>
-                    <tr>
-                        <td colspan="2" style="text-align:center;">
-                            Total
-                        </td>
-                        <td colspan="3" style="text-align:left;">
-                            <?php echo $jum_qty;?>
-                        </td>
-                    </tr>
-                </table>
-                <table style="width:100%; margin-top: 5px;">
-                    <tr style="vertical-align:top;">
-                        <td style="width:60%;">
-                            Keterangan: -
-                        </td>
-                        <td style="width:40%; text-align:left;">
-                            User ID: <?php echo $row_getHeader['PTDUSRID'];?>
-                        </td>
-                    </tr>
-                </table>
-                <!-- END ORIGINAL SPB DESIGN -->
-                <hr class="print-divider" />
+                <!-- BEGIN PREVIEW MODE -->
+                <div class="preview-mode">
+                    <table style="width:100%;">
+                        <tr>
+                            <td rowspan="4" style="vertical-align:top; padding-right:15px;">
+                                <img src="../lib-img/Nuansa.jpg" width="130" height="auto" />
+                            </td>
+                            <td rowspan="2" style="font-weight:bold; font-size:14px; vertical-align:top; white-space:nowrap;">
+                                SURAT PENERIMAAN BARANG (WEBSITE)
+                            </td>
+                            <td style="white-space:nowrap;">
+                                Cabang:
+                            </td>
+                            <td style="white-space:nowrap;">
+                                Tanggal PB:
+                            </td>
+                            <td style="white-space:nowrap;">
+                                Tanggal SJ Supplier:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <?php echo $row_getHeader['MET_Store_ID'];?>
+                            </td>
+                            <td>
+                                <?php echo date('d-M-Y', strtotime($row_getHeader['DOCDATE']));?>
+                            </td>
+                            <td>
+                                <?php echo date('d-M-Y', strtotime($row_getHeader['Vendor_Document_Date']));?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Diterima Dari
+                            </td>
+                            <td>
+                                Gudang:
+                            </td>
+                            <td>
+                                No. PB:
+                            </td>
+                            <td>
+                                No. SJ Supplier:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <?php echo $row_getHeader['VENDNAME'];?>
+                            </td>
+                            <td>
+                                <?php echo $row_getHeader['LOCNCODE'];?>
+                            </td>
+                            <td>
+                                <?php echo $row_getHeader['POPRCTNM'];?>
+                            </td>
+                            <td>
+                                <?php echo $row_getHeader['VNDDOCNM'];?>
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="width:100%; margin-top: 3px;">
+                        <tr style="">
+                            <td style="text-align:left;">
+                                No.
+                            </td>
+                            <td>
+                                ITEMDESC
+                            </td>
+                            <td>
+                                QTY Rcv
+                            </td>
+                            <td style="text-align:left;">
+                                UOFM
+                            </td>
+                            <td style="text-align:left;">
+                                PO Number
+                            </td>
+                        </tr>
+                        <?php
+                        $no=0;
+                        $jum_qty=0;
+                        $query_getDetail="	SELECT * FROM POSPO008
+                                            WHERE POPRCTNM='".mysql_real_escape_string($nomor_spb)."'
+                                        ";
+                        $res_getDetail=mysql_query($query_getDetail);
+                        while($row_getDetail=mysql_fetch_array($res_getDetail))
+                        {
+                            $no+=1;
+                            $jum_qty+=$row_getDetail['QTYRCVOA'];
+                        ?>
+                        <tr>
+                            <td>
+                                <?php echo $no;?>
+                            </td>
+                            <td>
+                                <?php echo $row_getDetail['ITEMDESC'];?>
+                            </td>
+                            <td style="text-align:left;">
+                                <?php echo number_format($row_getDetail['QTYRCVOA']);?>
+                            </td>
+                            <td style="text-align:left;">
+                                <?php echo $row_getDetail['UOFM'];?>
+                            </td>
+                            <td style="text-align:left;">
+                                <?php echo $row_getDetail['PONUMBER'];?>
+                            </td>
+                        </tr>
+                        <?php
+                        }
+                        ?>
+                        <tr>
+                            <td colspan="2" style="text-align:center;">
+                                Total
+                            </td>
+                            <td colspan="3" style="text-align:left;">
+                                <?php echo $jum_qty;?>
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="width:100%; margin-top: 5px;">
+                        <tr style="vertical-align:top;">
+                            <td style="width:60%;">
+                                Keterangan: -
+                            </td>
+                            <td style="width:40%; text-align:left;">
+                                User ID: <?php echo $row_getHeader['PTDUSRID'];?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- END PREVIEW MODE -->
+
+                <!-- BEGIN PRINT MODE (Minimalist) -->
+                <div class="print-mode">
+                    <table style="width:100%; table-layout: fixed; border-collapse: collapse;">
+                        <colgroup>
+                            <col style="width: 4%;">
+                            <col style="width: 6%;">
+                            <col style="width: 25%;">
+                            <col style="width: 30%;">
+                            <col style="width: 10%;">
+                            <col style="width: 25%;">
+                        </colgroup>
+                        <tr style="font-weight:bold;">
+                            <td style="padding-top: 7px !important; padding-bottom: 7px !important;">#<?php echo $index; ?></td>
+                            <td style="padding-top: 7px !important; padding-bottom: 7px !important;"><?php echo $row_getHeader['MET_Store_ID'];?></td>
+                            <td style="padding-top: 7px !important; padding-bottom: 7px !important;"><?php echo $row_getHeader['LOCNCODE'];?></td>
+                            <td style="padding-top: 7px !important; padding-bottom: 7px !important;"><?php echo $row_getHeader['POPRCTNM'];?> (<?php echo date('d-M-Y', strtotime($row_getHeader['DOCDATE']));?>)</td>
+                            <td colspan="2" style="padding-top: 7px !important; padding-bottom: 7px !important;"><?php echo $row_getHeader['VNDDOCNM'];?> (<?php echo date('d-M-Y', strtotime($row_getHeader['Vendor_Document_Date']));?>)</td>
+                        </tr>
+                        <?php
+                        if(mysql_num_rows($res_getDetail) > 0) {
+                            mysql_data_seek($res_getDetail, 0);
+                        }
+                        $no=0;
+                        while($row_getDetail=mysql_fetch_array($res_getDetail))
+                        {
+                            $no+=1;
+                        ?>
+                        <tr>
+                            <td></td>
+                            <td><?php echo $no;?></td>
+                            <td colspan="2"><?php echo $row_getDetail['ITEMDESC'];?></td>
+                            <td><?php echo number_format($row_getDetail['QTYRCVOA']);?></td>
+                            <td style="text-align:right;"><?php echo $row_getDetail['PONUMBER'];?></td>
+                        </tr>
+                        <?php
+                        }
+                        ?>
+                    </table>
+                </div>
+                <!-- END PRINT MODE -->
             </div>
         </div>
         <?php } ?>
