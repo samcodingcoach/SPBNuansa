@@ -157,6 +157,8 @@ include('../Connection/validateSession.php');
                 return;
             }
             
+            var loader = document.getElementById('page-loader');
+            
             var btnReport = document.getElementById("btnViewReport");
             if (btnReport) {
                 btnReport.disabled = true;
@@ -178,7 +180,14 @@ include('../Connection/validateSession.php');
 			frm.action = "printBulkSPB.php";
 			frm.method = "POST";
 			frm.target = "_self";
-			frm.submit();
+            
+            // Jeda 3 detik agar animasi tombol terlihat sebelum browser freeze
+            setTimeout(function() {
+                if (loader) {
+                    loader.style.display = 'flex';
+                }
+			    frm.submit();
+            }, 3000);
 		}
 		
 		$(document).ready(function () {
@@ -215,21 +224,29 @@ include('../Connection/validateSession.php');
 
 			$("#chkAll").click(function () {
                 var isChecked = this.checked;
+                var alertShown = false;
 				$("input[name='chkRow[]']").each(function () {
-                    $(this).prop('checked', isChecked);
                     var val = this.value;
                     if (isChecked) {
-                        if (selectedSPB.indexOf(val) === -1) selectedSPB.push(val);
+                        if (selectedSPB.length >= 30 && selectedSPB.indexOf(val) === -1) {
+                            if (!alertShown) {
+                                alert("Maksimal 30 data yang dapat dipilih!");
+                                alertShown = true;
+                            }
+                            $(this).prop('checked', false);
+                        } else {
+                            $(this).prop('checked', true);
+                            if (selectedSPB.indexOf(val) === -1) selectedSPB.push(val);
+                        }
                     } else {
+                        $(this).prop('checked', false);
                         var index = selectedSPB.indexOf(val);
                         if (index !== -1) selectedSPB.splice(index, 1);
                     }
                 });
                 
-                if (selectedSPB.length > 30) {
-                    alert("Maksimal 30 data yang dapat dipilih!");
-                    // Tidak membatalkan centang all agar tidak rumit, tapi validasi saat submit akan mencegah > 30
-                }
+
+                
                 sessionStorage.setItem('selectedSPB', JSON.stringify(selectedSPB));
 				updateReportButton();
 			});
@@ -265,11 +282,38 @@ include('../Connection/validateSession.php');
     </script>
     <!-- /TinyMCE -->
     <style type="text/css">
-        #progress-bar
-        {
-            width: 400px;
+        #progress-bar { width: 400px; }
+        #page-loader {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: #1a252f;
         }
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
+
+    <div id="page-loader">
+        <div class="spinner"></div>
+        <div>Memproses Data SPB...</div>
+        <div style="font-size: 14px; font-weight: normal; margin-top: 10px; color: #555;">Mohon tunggu sebentar sementara data dikumpulkan</div>
+    </div>
+
     <div class="box round first fullpage" style="padding:20px;">
         <h2>
             Daftar SPB
